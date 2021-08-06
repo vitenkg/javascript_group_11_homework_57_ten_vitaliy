@@ -8,15 +8,16 @@ const Calculator = () => {
     const [people, setPeople] = useState([]);
 
     const [split, setSplit] = useState({
-        peoples: undefined,
-        sum: undefined,
+        peoples: 0,
+        sum: 0,
         per: 15,
-        delivery: undefined,
+        delivery: 0,
     });
 
     const [individual, setIndividual] = useState({
         per: 15,
-        delivery: undefined,
+        delivery: 0,
+        sum: 0,
     });
 
     const [totalSplit, setTotalSplit] = useState({
@@ -62,6 +63,7 @@ const Calculator = () => {
     };
 
     let calcSplit = null;
+    let calcIndividual = null;
 
     if (showCheck) {
         calcSplit = (
@@ -71,6 +73,18 @@ const Calculator = () => {
                 <div>Каждый оплачивает: {totalSplit.each} сом</div>
             </div>
         );
+    }
+
+    if (showCheck) {
+        calcIndividual = (
+            <p>
+                <div>Общая сумма: {individual.sum} сом</div>
+                {totalIndividual.map(ind => (
+                    <div key={ind.id}>{ind.name}: {ind.totalPrice} сом</div>
+                ))}
+            </p>
+        )
+
     }
 
     const calculationSplit = e => {
@@ -93,21 +107,28 @@ const Calculator = () => {
     const calculationIndividual = e => {
         e.preventDefault();
         let delivery = 0;
+        let total = 0;
         if (individual.delivery === undefined) {
             delivery = 0;
         } else {
             delivery = individual.delivery / people.length
         }
-        console.log(delivery);
-        setTotalIndividual(people.map(p => {
-            return {
-                ...totalIndividual,
-                name: p.name,
-                totalPrice: p.price + (p.price * (individual.per / 100)) + delivery,
 
+        setTotalIndividual(people.map(p => {
+            total += p.price;
+            return {
+                ...p,
+                name: p.name,
+                totalPrice: Math.ceil(p.price + (p.price * (individual.per / 100)) + delivery),
+                id: Math.random(),
             }
         }))
 
+        setShowCheck(true);
+        setIndividual(prev => ({
+            ...prev,
+            sum: total,
+        }));
     };
 
     const onChangeInputsInd = e => {
@@ -257,11 +278,11 @@ const Calculator = () => {
                         >
                             Рассчитать
                         </button>
+                        {calcIndividual}
                     </form>
                 )}
             </div>
         </div>
     );
 };
-
 export default Calculator;
